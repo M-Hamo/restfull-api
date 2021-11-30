@@ -8,6 +8,10 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
+const { graphqlHTTP } = require("express-graphql");
+
+const { schema } = require("./graphql/graphql-schema");
+
 // middle where
 app.use(cors());
 app.use(express.json());
@@ -15,8 +19,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use("/", express.static(path.join(__dirname, "static")));
 
-// connect to database
-
+/**
+ * @description This function is responsible for connecting with mongodb by using mongoose
+ */
 const initialMongo = async () => {
   try {
     await mongoose
@@ -32,21 +37,16 @@ const initialMongo = async () => {
 
 initialMongo();
 
-// app.use(logger);
-// app.get("/", sayHello);
+// app.use("/api/data", require("./routes/userRouter"));
+// app.use("/api/register", require("./routes/registerRouter"));
 
-// function logger(req, res, next) {
-//   console.log("hey mother fucker");
-//   next();
-// }
-
-// function sayHello(req, res, next) {
-//   res.send("Hello World ...");
-//   next();
-// }
-
-app.use("/api/data", require("./routes/userRouter"));
-app.use("/api/register", require("./routes/registerRouter"));
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema,
+    graphiql: true,
+  })
+);
 
 const port = process.env.PROT || 3000;
 app.listen(port, () => {
